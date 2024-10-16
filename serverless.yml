@@ -1,0 +1,56 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: csabrera
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: aws-lambda
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-lambda
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: sa-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:sa-east-1:841162701266:table/Tareas
+
+functions:
+  APISwapi:
+    handler: src/app.server
+    events:
+      - httpApi:
+          path: /
+          method: get
+
+  AgregarTarea:
+    handler: src/crearTarea.crearTarea
+    events:
+      - httpApi:
+          path: /tareas
+          method: post
+
+  ListarTareas:
+    handler: src/listarTareas.listarTareas
+    events:
+      - httpApi:
+          path: /tareas
+          method: get
+
+resources:
+  Resources:
+    Tareas:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tareas
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+plugins:
+  - serverless-offline
